@@ -20,7 +20,7 @@ const globalEmitter = {
         this.events[event][key] = cb;
 
         return () => {
-            this.events[event] = this.events[event]?.filter((i) => cb !== i);
+            delete this.events[event][key];
         };
     },
 };
