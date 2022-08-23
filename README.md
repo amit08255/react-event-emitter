@@ -55,10 +55,53 @@ const AccountShell = withEmitter<Props>(AccountShellMain);
 export default AccountShell;
 ```
 
+## How to Use Emitter with useEffect hook
+
+To use event emitter with `useEffect` hook to prevent multiple times registering, you just need to wrap callback in `useCallback` hook.
+
+```tsx
+import withEmitter from 'components/EventEmitter/withEmitter';
+
+interface Props {
+    children: React.ReactNode,
+}
+
+interface PropsMain extends Props {
+    emitter: EventEmitter,
+}
+
+const AccountShellMain = (props:PropsMain) => {
+    const { children, emitter } = props;
+
+    const callback = useCallback((promise: Promise<any>) => {
+        promise.then((res) => {
+            console.log(res);
+        }).catch((err) => {
+            console.log(err);
+        });
+    }, [currentSearchProps, filtersReady]);
+
+    useEffect(() => {
+        // registering event subscribers
+        emitter.on('create/new-account', callback);
+    }, [callback]);
+
+    return (
+        <>
+         {children}
+        </>
+    );
+};
+
+const AccountShell = withEmitter<Props>(AccountShellMain);
+
+export default AccountShell;
+```
+
 ## APIs
 
 Below are list of emitter APIs which can be used to handle events:
 
 * **emit(eventName:string, arguments:array[])**: This function allows you to emit an event by specific name and all the data after event name will be passed to subscriber callback.
 
-* **on(eventName:string, callback:Function, key?:string)**: This function allows you to add subscriber to event emitter. The callback function will be executed when the provided event will be trigerred. The main thing to notice here is the optional parameter `key`. The default value of `key` is `index`. This parameter is used to identify the callback being added for particular event and prevent duplication of the callback function. If no `key` is passed then every callback function passed for same event will replace the previous callback function. It simply means that if you need to add multiple callback functions for an event then you need to pass `key`. This function returns a function which can be used to unsubscribe from that event.
+* **on(eventName:string, callback:Function, key?:string)**: This function allows you to add subscriber to event emitter. The callback function will be executed when the provided event will be trigerred. The main thing to notice here is the optional parameter `key`. The default value of `key` is `index`. This parameter is used to identify the callback being added for particular event and prevent duplication of the callback function. If no `key` is passed then every callback function passed for same event will replace the previous callback function. It simply means that if you need to add multiple callback functions for an event then you need to pass `key`.
